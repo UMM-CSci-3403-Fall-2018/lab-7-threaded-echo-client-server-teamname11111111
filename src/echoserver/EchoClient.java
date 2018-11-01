@@ -46,9 +46,14 @@ public class EchoClient {
 }
 
  class ServerWriter implements Runnable {
+    private InputStream iStream;
+
+    public ServerWriter(InputStream iStream) {
+        this.iStream = iStream;
+    }
     public void run() {
         try {
-            int socketByte = socketInputStream.read();
+            int socketByte = iStream.read();
             System.out.write(socketByte);
             } catch (IOException e) {
             e.printStackTrace();
