@@ -17,19 +17,27 @@ public class EchoClient {
         Socket socket = new Socket("localhost", PORT_NUMBER);
         InputStream socketInputStream = socket.getInputStream();
         OutputStream socketOutputStream = socket.getOutputStream();
-        Thread t1 = new Thread(new keyboardReader());
-        Thread t2 = new Thread(new serverWriter());
+
+        Thread t1 = new Thread(new KeyboardReader(socketOutputStream));
+        Thread t2 = new Thread(new ServerWriter(socketInputStream));
         t1.start();
         t2.start();
-    }        System.out.flush();
+
+    }
 }
 
-public class keyboardReader implements Runnable {
+ class KeyboardReader implements Runnable {
+    private OutputStream oStream;
+
+    public KeyboardReader(OutputStream oStream) {
+        this.oStream = oStream;
+    }
+
     public void run() {
         try {
             int readByte;
             while((readByte = System.in.read()) != -1) {
-                socketOutputStream.write(readByte);
+                oStream.write(readByte);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -37,7 +45,7 @@ public class keyboardReader implements Runnable {
     }
 }
 
-public class serverWriter implements Runnable {
+ class ServerWriter implements Runnable {
     public void run() {
         try {
             int socketByte = socketInputStream.read();
