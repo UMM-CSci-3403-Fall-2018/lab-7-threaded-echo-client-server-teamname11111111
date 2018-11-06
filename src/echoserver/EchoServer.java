@@ -18,12 +18,35 @@ public class EchoServer {
 		ServerSocket serverSocket = new ServerSocket(PORT_NUMBER);
 		while (true) {
 			Socket socket = serverSocket.accept();
-			InputStream inputStream = socket.getInputStream();
-			OutputStream outputStream = socket.getOutputStream();
-			int b;
-			while ((b = inputStream.read()) != -1) {
-				outputStream.write(b);
+			InputStream iStream = socket.getInputStream();
+			OutputStream oStream = socket.getOutputStream();
+
+			Thread a = new Thread(new ServerThreader(oStream, socket, iStream));
+			a.start();
 			}
 		}
 	}
-}
+
+	class ServerThreader implements Runnable {
+		private OutputStream oStream;
+		private Socket socket;
+		private InputStream iStream;
+
+		public ServerThreader(OutputStream oStream, Socket socket, InputStream iStream) {
+			this.socket = socket;
+			this.iStream = iStream;
+			this.oStream = oStream;
+		}
+
+		public void run() {
+			try {
+				int b;
+				while ((b = iStream.read()) != -1) {
+					oStream.write(b);
+				}
+				socket.shutdownOutput();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
